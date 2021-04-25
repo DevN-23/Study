@@ -1,44 +1,64 @@
-import { useState } from 'react';
-import Tweet from './components/Tweet';
+import { useEffect, useState } from 'react';
+import Recipe from './components/Recipe';
 import './App.css';
 
-function App() {
-  
-  const [isLoggedIn, setLoggedIn] = useState(false);
-  const [count, setCount] = useState(0);
-  const [users, setUsers] = useState([
-    { name: 'Hodor', message: 'Hold the door!!!' },
-    { name: 'John Snow', message: 'I\'m nights watch on the walls!!!' },
-    { name: 'Tori', message: 'Don\'t know anyone' },
-    { name: 'Arya Stark', message: 'Valar Morghulis :p :p' }
-  ])
+const App = () => {
 
-  const increment = () => {
-    setLoggedIn(!isLoggedIn);
-    setCount(count+1);
+  const [recipes, setRecipes] = useState([]);
+  const [search, setSearch] = useState('');
+  const [query, setQuery] = useState('chicken')
+
+  const APP_ID = '122141';
+  const APP_KEY = '131311343454asdaww1ewt23ed';
+  const GET_RECIPES = `https://api.edamam.com/search?q=${query}&app_id=${APP_ID}&app_key=${APP_KEY}`;
+
+  useEffect(() => {
+    // getRecipes();
+  }, [query]);
+  
+  const getRecipes = async () => {
+    const response = await fetch(GET_RECIPES);
+    const data = await response.json();
+    console.log(data.hits);
+    setRecipes(data.hits);
+  }
+
+  const updateSearch = e => {
+    setSearch(e.target.value);
+  }
+
+  const submitSearch = e => {
+    e.preventDefault();
+    setQuery(search);
   }
 
   return (
-    <div className="app">
-      {
-        users.map(user => {
-          return (
-            <Tweet name={user.name} message={user.message} key={user.name} />
-          )
-        })
-      }
+    <div className="App">
+      <form className="search-form" onSubmit={submitSearch}>
+        <input
+          type="text"
+          className="search-bar"
+          value={search}
+          onChange={updateSearch}
+        />
+        <button
+          type="submit"
+          className="search-button"
+        >Search</button>
+      </form>
+      <div className="recipes">
+        {recipes.map(data => (
+          <Recipe
+            key={data.recipe.label}
+            title={data.recipe.label}
+            calories={data.recipe.calories}
+            image={data.recipe.image}   
+            ingredients={data.recipe.ingredients}
+          />
+        ))}
+      </div>
     </div>
   );
 }
 
-const getTweets = () => {
-  return (
-    <div className="app">
-      <Tweet name="Hodor" message="Hold the door!!!" />
-      <Tweet name="John Snow" message="I'm nights watch on the walls!!!" />
-      <Tweet name="Tori" message="Don't know anyone" />
-      <Tweet name="Arya Stark" message="Valar Morghulis :p :p" />
-    </div>
-  )
-}
 export default App;
